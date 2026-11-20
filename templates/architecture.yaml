@@ -1,0 +1,49 @@
+{{- /* Rendered per composition so the detail page can read the chart architecture through
+       snowplow /call under the caller's own RBAC. Edit data.architecture; the builder owns the rest. */}}
+{{- $g := .Values.global | default dict }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-architecture" ($g.compositionName | default .Release.Name) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    krateo.io/architecture: "gke-cluster"
+data:
+  architecture: |
+    apiVersion: architecture.krateo.io/v1alpha1
+    kind: ChartArchitecture
+    chart: gke-cluster
+    resources:
+      - id: cluster
+        class: custom
+        apiVersion: container.cnrm.cloud.google.com/v1beta1
+        kind: ContainerCluster
+        template: templates/cluster.yaml
+        name: printf "%s-cluster" $.Release.Name | trunc 63 | trimSuffix "-"
+        readyWhen: .status.conditions[] | select(.type == "Ready") | .status == "True"
+      - id: nodepool
+        class: custom
+        apiVersion: container.cnrm.cloud.google.com/v1beta1
+        kind: ContainerNodePool
+        template: templates/nodepool.yaml
+        name: printf "%s-nodepool" $.Release.Name | trunc 63 | trimSuffix "-"
+        dependsOn:
+          - ref: cluster
+            ready: true
+        readyWhen: .status.conditions[] | select(.type == "Ready") | .status == "True"
+    states:
+      - name: cluster
+      - name: nodepool
+{{- /* krateo:graph begin — generated from data.architecture; edit the descriptor, not this block. */}}
+{{- $v := .Values.AsMap }}
+{{- $nodes := list }}
+{{- $names := list }}
+{{- $present := true }}
+{{- $names = append $names (printf "%s-cluster" $.Release.Name | trunc 63 | trimSuffix "-") }}
+{{- $nodes = append $nodes (dict "id" "cluster" "apiVersion" "container.cnrm.cloud.google.com/v1beta1" "kind" "ContainerCluster" "class" "custom" "level" 0 "readyWhen" ".status.conditions[] | select(.type == \"Ready\") | .status == \"True\"" "forEach" false "present" $present "names" $names "dependsOn" (list)) }}
+{{- $names = list }}
+{{- $present = true }}
+{{- $names = append $names (printf "%s-nodepool" $.Release.Name | trunc 63 | trimSuffix "-") }}
+{{- $nodes = append $nodes (dict "id" "nodepool" "apiVersion" "container.cnrm.cloud.google.com/v1beta1" "kind" "ContainerNodePool" "class" "custom" "level" 1 "readyWhen" ".status.conditions[] | select(.type == \"Ready\") | .status == \"True\"" "forEach" false "present" $present "names" $names "dependsOn" (list (dict "ref" "cluster" "ready" true "all" false "active" true))) }}
+  graph: {{ dict "v" 1 "chart" "gke-cluster" "states" (list "cluster" "nodepool") "composition" (dict "apiVersion" ($g.compositionApiVersion | default "") "resource" ($g.compositionResource | default "") "name" ($g.compositionName | default "") "namespace" .Release.Namespace "uid" ($g.compositionId | default "")) "nodes" $nodes | toJson | quote }}
+{{- /* krateo:graph end */}}
