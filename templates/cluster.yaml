@@ -1,0 +1,16 @@
+apiVersion: container.cnrm.cloud.google.com/v1beta1
+kind: ContainerCluster
+metadata:
+  name: {{ printf "%s-cluster" $.Release.Name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    cnrm.cloud.google.com/project-id: {{ .Values.projectId | quote }}
+spec:
+  location: {{ .Values.location | quote }}
+  initialNodeCount: {{ .Values.initialNodeCount }}
+  releaseChannel:
+    channel: {{ .Values.releaseChannel | quote }}
+  {{- if .Values.minMasterVersion }}
+  minMasterVersion: {{ .Values.minMasterVersion | quote }}
+  {{- end }}
+  ipAllocationPolicy: {}

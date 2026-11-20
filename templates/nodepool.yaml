@@ -1,0 +1,27 @@
+{{- /* krateo:gate begin — generated from architecture.yaml; edit the descriptor, not this block. */}}
+{{- $gate := true -}}
+{{- $dep0 := lookup "container.cnrm.cloud.google.com/v1beta1" "ContainerCluster" $.Release.Namespace (printf "%s-cluster" $.Release.Name | trunc 63 | trimSuffix "-") -}}
+{{- $ok0 := false -}}
+{{- range (dig "status" "conditions" (list) $dep0) -}}{{- if and (eq (toString .type) "Ready") (eq (toString .status) "True") -}}{{- $ok0 = true -}}{{- end -}}{{- end -}}
+{{- if not $ok0 -}}{{- $gate = false -}}{{- end -}}
+{{- if $gate }}
+apiVersion: container.cnrm.cloud.google.com/v1beta1
+kind: ContainerNodePool
+metadata:
+  name: {{ printf "%s-nodepool" $.Release.Name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    cnrm.cloud.google.com/project-id: {{ .Values.projectId | quote }}
+spec:
+  location: {{ .Values.location | quote }}
+  clusterRef:
+    name: {{ printf "%s-cluster" $.Release.Name | trunc 63 | trimSuffix "-" }}
+  nodeCount: {{ .Values.nodePool.nodeCount }}
+  nodeConfig:
+    machineType: {{ .Values.nodePool.machineType | quote }}
+    diskSizeGb: {{ .Values.nodePool.diskSizeGb }}
+  management:
+    autoRepair: {{ .Values.nodePool.autoRepair }}
+    autoUpgrade: {{ .Values.nodePool.autoUpgrade }}
+{{- end }}
+{{- /* krateo:gate end */}}

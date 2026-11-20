@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "projectId",
+    "location"
+  ],
+  "properties": {
+    "global": {
+      "type": "object"
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "GCP Project ID where the GKE cluster is provisioned (sets cnrm.cloud.google.com/project-id)."
+    },
+    "location": {
+      "type": "string",
+      "minLength": 1,
+      "default": "us-central1-a",
+      "description": "GKE zone or region (e.g. us-central1-a or us-central1)."
+    },
+    "releaseChannel": {
+      "type": "string",
+      "enum": [
+        "UNSPECIFIED",
+        "RAPID",
+        "REGULAR",
+        "STABLE"
+      ],
+      "default": "REGULAR",
+      "description": "GKE release channel."
+    },
+    "minMasterVersion": {
+      "type": "string",
+      "default": "",
+      "description": "Optional minimum Kubernetes master version (must be >= 1.36 for Krateo remote targeting)."
+    },
+    "initialNodeCount": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1,
+      "description": "Initial node count for the cluster default pool."
+    },
+    "nodePool": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "machineType": {
+          "type": "string",
+          "default": "e2-medium",
+          "description": "GCE machine type for the node pool."
+        },
+        "diskSizeGb": {
+          "type": "integer",
+          "minimum": 10,
+          "default": 50,
+          "description": "Boot disk size in GB for each node."
+        },
+        "nodeCount": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "Desired node count for the node pool."
+        },
+        "autoRepair": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable node auto-repair."
+        },
+        "autoUpgrade": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable node auto-upgrade."
+        }
+      }
+    }
+  }
+}

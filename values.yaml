@@ -1,0 +1,11 @@
+projectId: my-gcp-project
+location: us-central1-a
+releaseChannel: REGULAR
+minMasterVersion: ""
+initialNodeCount: 1
+nodePool:
+  machineType: e2-medium
+  diskSizeGb: 50
+  nodeCount: 1
+  autoRepair: true
+  autoUpgrade: true
